@@ -1,0 +1,47 @@
+# general formatting
+edition = "2018"
+##version = "Two"
+##indent_style = "Block"
+use_small_heuristics = "Default"
+max_width = 80
+##error_on_unformatted = true
+hard_tabs = false
+newline_style = "Unix"
+remove_nested_parens = true
+##space_after_colon = true
+##space_before_colon = false
+##struct_lit_single_line = true
+tab_spaces = 4
+##trailing_comma = "Vertical"
+##trailing_semicolon = true
+use_try_shorthand = true
+##overflow_delimited_expr = true
+##blank_lines_upper_bound = 2
+
+# comments
+##comment_width = 80
+##wrap_comments = true
+##format_strings = true
+##normalize_comments = true
+##format_code_in_doc_comments = true
+
+# braces
+##fn_args_layout = "Tall"
+##control_brace_style = "AlwaysSameLine"
+##brace_style = "SameLineWhere"
+##empty_item_single_line = true
+
+# macros
+##format_macro_matchers = true
+##format_macro_bodies = true
+
+# imports
+reorder_imports = false
+##imports_indent = "Block"
+##imports_layout = "HorizontalVertical"
+##merge_imports = true
+
+# match blocks
+##match_block_trailing_comma = true
+##force_multiline_blocks = true
+##match_arm_blocks = true

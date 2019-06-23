@@ -1,7 +1,8 @@
 extern crate cgmath;
-use std::fs::File;
-use std::io::Write;
-use cgmath::{Deg, InnerSpace, Vector3, Vector4, vec2, vec3, vec4};
+extern crate image;
+
+use cgmath::{Deg, InnerSpace, Vector3, vec3};
+use image::{ImageBuffer, Rgb, RgbImage};
 
 mod camera;
 use camera::CameraMatrix;
@@ -45,6 +46,7 @@ impl Sphere {
                 return Some(solution_1 / 2.0);
             }
         }
+
         None
     }
 
@@ -57,66 +59,11 @@ impl Sphere {
     }
 }
 
-// bad for cache locality
-#[derive(Debug, Copy, Clone)]
-struct Pixel {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-}
-
-struct ImageData {
-    height: usize,
-    width: usize,
-    max_val: u16,
-    buf: Box<[Pixel]>,
-}
-
-impl ImageData {
-    // kind of a silly way to save image files for testing.
-    // write throughput is an issue here since we're making very granular writes
-    // and waiting for them to complete.
-    //
-    // TODO:
-    // how does rust do write buffering? do I need to try something smarter?
-    fn save_ppm(&self, filename: &str) -> std::io::Result<()> {
-        let mut file = File::create(filename)?;
-
-        // write ppm header
-        write!(
-            file,
-            "P3\n{} {}\n{}\n",
-            self.width, self.height, self.max_val
-        )?;
-
-        // write image data
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let pix = &self.buf[row * self.width + col];
-                write!(file, "{} {} {}\t", pix.r, pix.g, pix.b)?;
-            }
-            write!(file, "\n")?;
-        }
-
-        Ok(())
-    }
-}
-
 fn main() {
-    const IMAGE_WIDTH: usize = 200;
-    const IMAGE_HEIGHT: usize = 150;
+    const IMAGE_WIDTH: u32 = 800;
+    const IMAGE_HEIGHT: u32 = 600;
 
-    // alloate a row-major buffer
-    // use std::vec? this overflows the stack for large arrays
-    let buf =
-        Box::new([Pixel { r: 0, g: 0, b: 0 }; IMAGE_WIDTH * IMAGE_HEIGHT]);
-
-    let mut img = ImageData {
-        height: IMAGE_HEIGHT,
-        width: IMAGE_WIDTH,
-        max_val: 256,
-        buf: buf,
-    };
+    let mut image: RgbImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
     let fov = Deg(100.0);
     let cam = CameraMatrix::new(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -138,17 +85,13 @@ fn main() {
                 origin: origin,
                 direction: dir.normalize(),
             };
-            if let Some(_) = sphere.intersect(ray) {
-                img.buf[j * IMAGE_WIDTH + i] = Pixel {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                };
+            if let Some(_t) = sphere.intersect(ray) {
+                image[(i, j)] = Rgb([255, 255, 255]);
             }
         }
     }
 
-    img.save_ppm("render.ppm");
+    image.save("render.png").expect("Saving image failed.");
 }
 
 #[cfg(test)]
@@ -169,26 +112,5 @@ mod tests {
 
         let distance = sphere.intersect(ray);
         assert_eq!(distance.unwrap(), 5.0);
-    }
-
-    #[test]
-    fn test_save_ppm() {
-        const IMAGE_WIDTH: usize = 20;
-        const IMAGE_HEIGHT: usize = 15;
-        let buf = Box::new(
-            [Pixel {
-                r: 100,
-                g: 100,
-                b: 100,
-            }; IMAGE_WIDTH * IMAGE_HEIGHT],
-        );
-        let mut img = ImageData {
-            height: IMAGE_HEIGHT,
-            width: IMAGE_WIDTH,
-            max_val: 256,
-            buf: buf,
-        };
-
-        img.save_ppm("test_save_ppm.ppm");
     }
 }

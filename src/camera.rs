@@ -17,10 +17,10 @@ impl CameraMatrix {
     // origin along the negative Z axis.
     pub fn camera(
         fov: impl Angle<Unitless = f64>,
-        x_max: usize,
-        y_max: usize,
-        x: usize,
-        y: usize,
+        x_max: u32,
+        y_max: u32,
+        x: u32,
+        y: u32,
     ) -> Vector3<f64> {
         // convert to pixel coordinates to normalized device coordinates pixel
         // coordinates start with the origin (0, 0) as the top left-most pixel
@@ -52,8 +52,8 @@ impl CameraMatrix {
     /// dimensions.
     pub fn new(
         fov: impl Angle<Unitless = f64>,
-        x_max: usize,
-        y_max: usize,
+        x_max: u32,
+        y_max: u32,
     ) -> CameraMatrix {
         let c0 = CameraMatrix::camera(fov, x_max, y_max, 1, 0);
         let c1 = CameraMatrix::camera(fov, x_max, y_max, 0, 1);

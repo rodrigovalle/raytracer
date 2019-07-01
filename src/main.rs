@@ -14,6 +14,7 @@ struct Ray {
 
 impl Ray {
     pub fn new(origin: Vector3<f64>, direction: Vector3<f64>) -> Ray {
+        // Avoid weirdness by always normalizing ray directions
         Ray {
             origin,
             direction: direction.normalize(),
@@ -29,7 +30,7 @@ struct Sphere {
 impl Sphere {
     // Returns the distance to the first intersection with a sphere, if it
     // exists.
-    fn intersect(&self, ray: Ray) -> Option<f64> {
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
         let tmp = ray.origin - self.center;
         let b = 2.0 * tmp.dot(ray.direction);
         let c = tmp.dot(tmp) - self.radius.powi(2);
@@ -68,30 +69,42 @@ fn main() {
     let fov = Deg(100.0);
     let cam = CameraMatrix::new(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = vec3(0.0, 0.0, 0.0);
-    let sphere = Sphere {
-        center: vec3(0.0, 0.0, -10.0),
-        radius: 5.0,
-    };
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
             //let dir = cam * vec2(i as f64, j as f64);
             let dir =
                 CameraMatrix::camera(fov, IMAGE_WIDTH, IMAGE_HEIGHT, i, j);
-            // TODO: move this to a constructor; make sure we always normalize.
-            // square roots are expensive though...
-            //println!("{:#?}\t{} {}", dir.magnitude(), i, j);
-            let ray = Ray {
-                origin: origin,
-                direction: dir.normalize(),
-            };
-            if let Some(_t) = sphere.intersect(ray) {
-                image[(i, j)] = Rgb([255, 255, 255]);
-            }
+
+            let ray = Ray::new(origin, dir);
+            image[(i, j)] = trace(ray);
         }
     }
 
-    image.save("render.png").expect("Saving image failed.");
+    image.save("render.png").expect("Failed to write image");
+}
+
+const light: Vector3<f64> = vec3(5.0, 5.0, 0.0);
+const sphere: Sphere = Sphere {
+    center: vec3(0.0, 0.0, -10.0),
+    radius: 5.0,
+};
+
+fn trace(ray: Ray) -> Rgb<u8> {
+    if let Some(t) = sphere.intersect(&ray) {
+        let hit = ray.origin + ray.direction * t;
+        let normal = sphere.normal(hit);
+        let light_dir = light - hit;
+        let light_dir = light_dir.normalize();
+
+        let brightness = normal.dot(light_dir);
+        let brightness = brightness * 255.0;
+        let brightness = brightness.max(0.0).floor() as u8;
+
+        return Rgb([brightness, brightness, brightness]);
+    }
+
+    Rgb([0, 0 ,0])
 }
 
 #[cfg(test)]

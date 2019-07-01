@@ -67,7 +67,7 @@ fn main() {
     let mut image: RgbImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
     let fov = Deg(100.0);
-    let cam = CameraMatrix::new(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
+    //let cam = CameraMatrix::new(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = vec3(0.0, 0.0, 0.0);
 
     for j in 0..IMAGE_HEIGHT {
@@ -84,17 +84,17 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const light: Vector3<f64> = vec3(5.0, 5.0, 0.0);
-const sphere: Sphere = Sphere {
+const LIGHT: Vector3<f64> = vec3(5.0, 5.0, 0.0);
+const SPHERE: Sphere = Sphere {
     center: vec3(0.0, 0.0, -10.0),
     radius: 5.0,
 };
 
 fn trace(ray: Ray) -> Rgb<u8> {
-    if let Some(t) = sphere.intersect(&ray) {
+    if let Some(t) = SPHERE.intersect(&ray) {
         let hit = ray.origin + ray.direction * t;
-        let normal = sphere.normal(hit);
-        let light_dir = light - hit;
+        let normal = SPHERE.normal(hit);
+        let light_dir = LIGHT - hit;
         let light_dir = light_dir.normalize();
 
         let brightness = normal.dot(light_dir);

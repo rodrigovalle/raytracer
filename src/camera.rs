@@ -27,8 +27,8 @@ impl CameraMatrix {
         // on the screen, and we compute normalized device coordinates by
         // transforming them to the range [0, 1]. We add 0.5 to get the ray
         // going through the center of the pixel.
-        let x_ndc = ((x as f64) + 0.5) / (x_max as f64);
-        let y_ndc = ((y as f64) + 0.5) / (y_max as f64);
+        let x_ndc = (f64::from(x) + 0.5) / f64::from(x_max);
+        let y_ndc = (f64::from(y) + 0.5) / f64::from(y_max);
 
         // Screen coordinates transform normalized device coordinates so that
         // (0, 0) is straight down the negative Z axis. Screen coordinates are
@@ -40,7 +40,7 @@ impl CameraMatrix {
         // Stretch out the [-1, 1] x [-1, 1] square according to the aspect
         // ratio. Use the field of view to determine how wide to shoot the rays.
         let fov = Angle::tan(fov / 2.0);
-        let aspect_ratio = (x_max as f64) / (y_max as f64);
+        let aspect_ratio = f64::from(x_max) / f64::from(y_max);
         let x_camera = (x_screen) * aspect_ratio * fov;
         let y_camera = y_screen * fov;
 

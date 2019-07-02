@@ -85,6 +85,7 @@ fn main() {
 }
 
 const LIGHT: Vector3<f64> = vec3(5.0, 5.0, 0.0);
+const LIGHT_ENERGY: f64 = 40000.0;
 const SPHERE: Sphere = Sphere {
     center: vec3(0.0, 0.0, -10.0),
     radius: 5.0,
@@ -94,12 +95,14 @@ fn trace(ray: Ray) -> Rgb<u8> {
     if let Some(t) = SPHERE.intersect(&ray) {
         let hit = ray.origin + ray.direction * t;
         let normal = SPHERE.normal(hit);
-        let light_dir = LIGHT - hit;
-        let light_dir = light_dir.normalize();
 
-        let brightness = normal.dot(light_dir);
-        let brightness = brightness * 255.0;
-        let brightness = brightness.max(0.0).floor() as u8;
+        let light_vec = LIGHT - hit;
+        let light_dir = light_vec.normalize();
+        let light_dist = light_vec.magnitude() + t;
+
+        let brightness = Vector3::dot(normal, light_dir);
+        let brightness = brightness * LIGHT_ENERGY / light_dist.powi(2);
+        let brightness = f64::max(brightness, 0.0).floor() as u8;
 
         return Rgb([brightness, brightness, brightness]);
     }

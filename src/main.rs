@@ -126,7 +126,7 @@ mod tests {
         let direction = vec3(0.0, 0.0, -1.0);
         let ray = Ray::new(point, direction);
 
-        let distance = sphere.intersect(ray);
+        let distance = sphere.intersect(&ray);
         assert_eq!(distance.unwrap(), 5.0);
     }
 }

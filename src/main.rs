@@ -3,6 +3,7 @@ extern crate image;
 
 use cgmath::{Deg, InnerSpace, Vector3, vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
+use std::f64::consts::PI;
 
 mod camera;
 use camera::CameraMatrix;
@@ -77,7 +78,9 @@ fn main() {
                 CameraMatrix::camera(fov, IMAGE_WIDTH, IMAGE_HEIGHT, i, j);
 
             let ray = Ray::new(origin, dir);
-            image[(i, j)] = trace(ray);
+            let light_intensity = trace(ray);
+            let I = f64::floor(light_intensity * 255.0) as u8;
+            image[(i,j)] = Rgb([I, I, I]);
         }
     }
 
@@ -85,29 +88,33 @@ fn main() {
 }
 
 const LIGHT: Vector3<f64> = vec3(5.0, 5.0, 0.0);
-const LIGHT_ENERGY: f64 = 40000.0;
+const LIGHT_ENERGY: f64 = 500.0;
+const AMBIENT_LIGHT: f64 = 0.01;
 const SPHERE: Sphere = Sphere {
     center: vec3(0.0, 0.0, -10.0),
     radius: 5.0,
 };
 
-fn trace(ray: Ray) -> Rgb<u8> {
+
+// TODO: color encoding problem; light intensity is not bound to the range
+// [0.0, 1.0]. The image generation code assumes this in order to convert to the
+// range [0, 256) for image encoding, causing overflow errors in the final image
+// when the value goes above 255.
+fn trace(ray: Ray) -> f64 {
     if let Some(t) = SPHERE.intersect(&ray) {
         let hit = ray.origin + ray.direction * t;
         let normal = SPHERE.normal(hit);
 
         let light_vec = LIGHT - hit;
-        let light_dir = light_vec.normalize();
-        let light_dist = light_vec.magnitude() + t;
+        let magnitude2 = light_vec.magnitude2();
 
-        let brightness = Vector3::dot(normal, light_dir);
-        let brightness = brightness * LIGHT_ENERGY / light_dist.powi(2);
-        let brightness = f64::max(brightness, 0.0).floor() as u8;
-
-        return Rgb([brightness, brightness, brightness]);
+        let lambert = Vector3::dot(normal, light_vec) / f64::sqrt(magnitude2);
+        let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * magnitude2);
+        let intensity = f64::max(intensity, AMBIENT_LIGHT);
+        return intensity;
     }
 
-    Rgb([0, 0 ,0])
+    0.0
 }
 
 #[cfg(test)]
@@ -121,7 +128,6 @@ mod tests {
             radius: 5.0,
         };
 
-        // direction must be normalized otherwise we get weird intersect results
         let point = vec3(0.0, 0.0, 10.0);
         let direction = vec3(0.0, 0.0, -1.0);
         let ray = Ray::new(point, direction);

@@ -9,7 +9,6 @@ mod camera;
 mod scenes;
 use scenes::{Scene, Sphere};
 
-
 pub struct Ray {
     origin: Vector3<f64>,
     direction: Vector3<f64>,
@@ -59,35 +58,16 @@ const AMBIENT_LIGHT: f64 = 0.01;
 // range [0, 256) for image encoding, causing overflow errors in the final image
 // when the value goes above 255.
 fn trace(ray: Ray, scene: &impl Scene) -> f64 {
-    if let Some(t) = scene.intersect(&ray) {
-        let hit = ray.origin + ray.direction * t;
-        let normal = scene.normal(hit);
-
-        let light_vec = LIGHT - hit;
+    if let Some(normal) = scene.intersect(&ray) {
+        let light_vec = LIGHT - normal.origin;
         let magnitude2 = light_vec.magnitude2();
 
-        let lambert = Vector3::dot(normal, light_vec) / f64::sqrt(magnitude2);
+        let lambert =
+            Vector3::dot(normal.direction, light_vec) / f64::sqrt(magnitude2);
         let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * magnitude2);
         let intensity = f64::max(intensity, AMBIENT_LIGHT);
         return intensity;
     }
 
     0.0
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_ray_sphere_intersect() {
-        let sphere = Sphere::new(vec3(0.0, 0.0, 0.0), 5.0);
-
-        let point = vec3(0.0, 0.0, 10.0);
-        let direction = vec3(0.0, 0.0, -1.0);
-        let ray = Ray::new(point, direction);
-
-        let distance = sphere.intersect(&ray);
-        assert_eq!(distance.unwrap(), 5.0);
-    }
 }

@@ -6,7 +6,6 @@ use image::{ImageBuffer, Rgb, RgbImage};
 use std::f64::consts::PI;
 
 mod camera;
-use camera::CameraMatrix;
 
 struct Ray {
     origin: Vector3<f64>,
@@ -68,19 +67,17 @@ fn main() {
     let mut image: RgbImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
     let fov = Deg(100.0);
-    //let cam = CameraMatrix::new(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
+    let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = vec3(0.0, 0.0, 0.0);
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
-            //let dir = cam * vec2(i as f64, j as f64);
-            let dir =
-                CameraMatrix::camera(fov, IMAGE_WIDTH, IMAGE_HEIGHT, i, j);
-
+            let dir = camera * vec3(i as f64, j as f64, 1.0);
+            //let dir = camera::projection_function(fov, IMAGE_WIDTH, IMAGE_HEIGHT, i, j);
             let ray = Ray::new(origin, dir);
             let light_intensity = trace(ray);
             let I = f64::floor(light_intensity * 255.0) as u8;
-            image[(i,j)] = Rgb([I, I, I]);
+            image[(i, j)] = Rgb([I, I, I]);
         }
     }
 
@@ -94,7 +91,6 @@ const SPHERE: Sphere = Sphere {
     center: vec3(0.0, 0.0, -10.0),
     radius: 5.0,
 };
-
 
 // TODO: color encoding problem; light intensity is not bound to the range
 // [0.0, 1.0]. The image generation code assumes this in order to convert to the

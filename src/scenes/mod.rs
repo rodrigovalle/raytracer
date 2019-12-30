@@ -7,3 +7,6 @@ pub trait Scene {
 
 mod sphere;
 pub use sphere::Sphere;
+
+mod cornell;
+pub use cornell::CornellBox;

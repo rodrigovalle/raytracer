@@ -80,7 +80,7 @@ mod tests {
                 assert_abs_diff_eq!(
                     projection_function(fov, x_max, y_max, pixel_x, pixel_y),
                     matrix * vec3(pixel_x as f64, pixel_y as f64, 1.0),
-                    epsilon = 1.0e-5,
+                    epsilon = 1.0e-6,
                 );
             }
         }

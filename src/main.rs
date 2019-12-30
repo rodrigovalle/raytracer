@@ -7,8 +7,9 @@ use std::f64::consts::PI;
 
 mod camera;
 mod scenes;
-use scenes::{Scene, Sphere};
+use scenes::{Scene, Sphere, CornellBox};
 
+#[derive(Debug, PartialEq)]
 pub struct Ray {
     origin: Vector3<f64>,
     direction: Vector3<f64>,
@@ -33,12 +34,12 @@ fn main() {
     let fov = Deg(100.0);
     let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = vec3(0.0, 0.0, 0.0);
-    let scene = Sphere::new(vec3(0.0, 0.0, -10.0), 5.0);
+    //let scene = Sphere::new(vec3(0.0, 0.0, -10.0), 5.0);
+    let scene = CornellBox::new();
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
             let dir = camera * vec3(i as f64, j as f64, 1.0);
-            //let dir = camera::projection_function(fov, IMAGE_WIDTH, IMAGE_HEIGHT, i, j);
             let ray = Ray::new(origin, dir);
             let light_intensity = trace(ray, &scene);
             let I = f64::floor(light_intensity * 255.0) as u8;
@@ -49,8 +50,8 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const LIGHT: Vector3<f64> = vec3(5.0, 5.0, 0.0);
-const LIGHT_ENERGY: f64 = 500.0;
+const LIGHT: Vector3<f64> = vec3(5.0, 1.0, -7.0);
+const LIGHT_ENERGY: f64 = 200.0;
 const AMBIENT_LIGHT: f64 = 0.01;
 
 // TODO: color encoding problem; light intensity is not bound to the range

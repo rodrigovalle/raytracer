@@ -1,26 +1,26 @@
-extern crate cgmath;
 extern crate image;
 
-use cgmath::{Deg, InnerSpace, Vector3, vec3};
+use ultraviolet::vec::DVec3;
 use image::{ImageBuffer, Rgb, RgbImage};
 use std::f64::consts::PI;
 
 mod camera;
-mod scenes;
-use scenes::{Scene, Sphere, CornellBox};
+mod primitive;
+use primitive::{Scene, Sphere};
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
-    origin: Vector3<f64>,
-    direction: Vector3<f64>,
+    origin: DVec3,
+    direction: DVec3,
 }
 
 impl Ray {
-    pub fn new(origin: Vector3<f64>, direction: Vector3<f64>) -> Ray {
+    pub fn new(origin: DVec3, mut direction: DVec3) -> Ray {
         // Avoid weirdness by always normalizing ray directions
+        direction.normalize();
         Ray {
             origin,
-            direction: direction.normalize(),
+            direction: direction,
         }
     }
 }
@@ -31,15 +31,14 @@ fn main() {
 
     let mut image: RgbImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    let fov = Deg(100.0);
+    let fov = f64::to_radians(100.0);
     let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
-    let origin = vec3(0.0, 0.0, 0.0);
-    //let scene = Sphere::new(vec3(0.0, 0.0, -10.0), 5.0);
-    let scene = CornellBox::new();
+    let origin = DVec3::new(0.0, 0.0, 0.0);
+    let scene = Sphere::new(DVec3::new(0.0, 0.0, -10.0), 5.0);
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
-            let dir = camera * vec3(i as f64, j as f64, 1.0);
+            let dir = camera * DVec3::new(i as f64, j as f64, 1.0);
             let ray = Ray::new(origin, dir);
             let light_intensity = trace(ray, &scene);
             let I = f64::floor(light_intensity * 255.0) as u8;
@@ -50,7 +49,7 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const LIGHT: Vector3<f64> = vec3(5.0, 1.0, -7.0);
+const LIGHT: DVec3 = DVec3::new(5.0, 1.0, -7.0);
 const LIGHT_ENERGY: f64 = 200.0;
 const AMBIENT_LIGHT: f64 = 0.01;
 
@@ -61,11 +60,10 @@ const AMBIENT_LIGHT: f64 = 0.01;
 fn trace(ray: Ray, scene: &impl Scene) -> f64 {
     if let Some(normal) = scene.intersect(&ray) {
         let light_vec = LIGHT - normal.origin;
-        let magnitude2 = light_vec.magnitude2();
+        let mag_sq = light_vec.mag_sq();
 
-        let lambert =
-            Vector3::dot(normal.direction, light_vec) / f64::sqrt(magnitude2);
-        let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * magnitude2);
+        let lambert = normal.direction.dot(light_vec) / f64::sqrt(mag_sq);
+        let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * mag_sq);
         let intensity = f64::max(intensity, AMBIENT_LIGHT);
         return intensity;
     }

@@ -5,5 +5,5 @@ authors = ["rodrigovalle <rdan.valle@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-cgmath = "0.17.0"
 image = "0.21.2"
+ultraviolet = { version = "0.7", features = ["int", "f64"]}

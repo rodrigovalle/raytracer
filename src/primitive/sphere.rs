@@ -1,22 +1,22 @@
 use super::{Scene, Ray};
-use cgmath::{InnerSpace, Vector3, vec3};
+use ultraviolet::DVec3;
 
 pub struct Sphere {
-    center: Vector3<f64>,
+    center: DVec3,
     radius: f64,
 }
 
 impl Sphere {
-    pub fn new(center: Vector3<f64>, radius: f64) -> Sphere {
+    pub fn new(center: DVec3, radius: f64) -> Sphere {
         Sphere { center, radius }
     }
 
-    fn normal(&self, point: Vector3<f64>) -> Vector3<f64> {
+    fn normal(&self, point: DVec3) -> DVec3 {
         let x = (point.x - self.center.x) / self.radius;
         let y = (point.y - self.center.y) / self.radius;
         let z = (point.z - self.center.z) / self.radius;
 
-        vec3(x, y, z)
+        DVec3::new(x, y, z)
     }
 }
 
@@ -58,14 +58,14 @@ mod tests {
     #[test]
     fn test_ray_sphere_intersect() {
         // sphere centered at (0, 0, 0) with a radius of 5
-        let sphere = Sphere::new(vec3(0.0, 0.0, 0.0), 5.0);
+        let sphere = Sphere::new(DVec3::new(0.0, 0.0, 0.0), 5.0);
 
-        let point = vec3(0.0, 0.0, 10.0);
-        let direction = vec3(0.0, 0.0, -1.0);
+        let point = DVec3::new(0.0, 0.0, 10.0);
+        let direction = DVec3::new(0.0, 0.0, -1.0);
         let ray = Ray::new(point, direction);
 
         let normal = sphere.intersect(&ray).unwrap();
-        assert_eq!(normal.origin, vec3(0.0, 0.0, 5.0));
-        assert_eq!(normal.direction, vec3(0.0, 0.0, 1.0));
+        assert_eq!(normal.origin, DVec3::new(0.0, 0.0, 5.0));
+        assert_eq!(normal.direction, DVec3::new(0.0, 0.0, 1.0));
     }
 }

@@ -5,6 +5,7 @@ use image::{ImageBuffer, Rgb, RgbImage};
 use std::f64::consts::PI;
 
 mod camera;
+mod color;
 mod primitive;
 use primitive::{Scene, Sphere};
 
@@ -34,6 +35,7 @@ fn main() {
     let fov = f64::to_radians(100.0);
     let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = DVec3::new(0.0, 0.0, 0.0);
+    // +z direction is towards the camera
     let scene = Sphere::new(DVec3::new(0.0, 0.0, -10.0), 5.0);
 
     for j in 0..IMAGE_HEIGHT {
@@ -49,8 +51,8 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const LIGHT: DVec3 = DVec3::new(5.0, 1.0, -7.0);
-const LIGHT_ENERGY: f64 = 200.0;
+const LIGHT: DVec3 = DVec3::new(3.0, 0.0, 5.0);
+const LIGHT_ENERGY: f64 = 400.0;
 const AMBIENT_LIGHT: f64 = 0.01;
 
 // TODO: color encoding problem; light intensity is not bound to the range
@@ -64,8 +66,7 @@ fn trace(ray: Ray, scene: &impl Scene) -> f64 {
 
         let lambert = normal.direction.dot(light_vec) / f64::sqrt(mag_sq);
         let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * mag_sq);
-        let intensity = f64::max(intensity, AMBIENT_LIGHT);
-        return intensity;
+        return f64::max(intensity, AMBIENT_LIGHT);
     }
 
     0.0

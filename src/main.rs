@@ -7,24 +7,7 @@ use std::f64::consts::PI;
 mod camera;
 mod color;
 mod primitive;
-use primitive::{Scene, Sphere};
-
-#[derive(Debug, PartialEq)]
-pub struct Ray {
-    origin: DVec3,
-    direction: DVec3,
-}
-
-impl Ray {
-    pub fn new(origin: DVec3, mut direction: DVec3) -> Ray {
-        // Avoid weirdness by always normalizing ray directions
-        direction.normalize();
-        Ray {
-            origin,
-            direction: direction,
-        }
-    }
-}
+use primitive::{Scene, Sphere, Ray};
 
 fn main() {
     const IMAGE_WIDTH: u32 = 800;

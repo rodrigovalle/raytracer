@@ -41,7 +41,7 @@ impl Scene for Sphere {
             }
 
             if let Some(t) = dist {
-                let intersect = ray.origin + ray.direction * t;
+                let intersect = ray.position(t);
                 let normal = self.normal(intersect);
                 return Some(Ray::new(intersect, normal));
             }

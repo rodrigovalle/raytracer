@@ -1,13 +1,15 @@
 extern crate image;
 
-use ultraviolet::vec::DVec3;
+use ultraviolet::vec::DVec4;
 use image::{ImageBuffer, Rgb, RgbImage};
 use std::f64::consts::PI;
 
 mod camera;
 mod color;
 mod primitive;
-use primitive::{Scene, Sphere, Ray};
+mod math;
+use math::{Ray, point, vector};
+use primitive::{Scene, Sphere};
 
 fn main() {
     const IMAGE_WIDTH: u32 = 800;
@@ -17,13 +19,13 @@ fn main() {
 
     let fov = f64::to_radians(100.0);
     let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
-    let origin = DVec3::new(0.0, 0.0, 0.0);
+    let origin = point(0.0, 0.0, 0.0);
     // +z direction is towards the camera
-    let scene = Sphere::new(DVec3::new(0.0, 0.0, -10.0), 5.0);
+    let scene = Sphere::new(point(0.0, 0.0, -10.0), 5.0);
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
-            let dir = camera * DVec3::new(i as f64, j as f64, 1.0);
+            let dir = camera * vector(i as f64, j as f64, 1.0);
             let ray = Ray::new(origin, dir);
             let light_intensity = trace(ray, &scene);
             let I = f64::floor(light_intensity * 255.0) as u8;
@@ -34,7 +36,7 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const LIGHT: DVec3 = DVec3::new(3.0, 0.0, 5.0);
+const LIGHT: DVec4 = vector(3.0, 0.0, 5.0);
 const LIGHT_ENERGY: f64 = 400.0;
 const AMBIENT_LIGHT: f64 = 0.01;
 

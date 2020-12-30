@@ -9,7 +9,7 @@ use ultraviolet::vec::DVec4;
 /// parallel to the XY plane and is 1 unit away from the origin along the
 /// negative Z axis.
 pub fn projection_function(
-    fov: f64,  // in radians
+    fov: f64, // in radians
     x_max: u32,
     y_max: u32,
     x: u32,
@@ -44,11 +44,7 @@ pub fn projection_function(
 /// Create a 3x3 camera matrix, which transforms pixel coordinates of the vector
 /// form (x_pixel y_pixel 1.0)^T into primary rays. This matrix is the
 /// `projection_function` condensed and simplified into an augmented matrix.
-pub fn projection_matrix(
-    fov: f64,
-    x_max: u32,
-    y_max: u32,
-) -> DMat4 {
+pub fn projection_matrix(fov: f64, x_max: u32, y_max: u32) -> DMat4 {
     let fov = f64::tan(fov / 2.0);
     let x_max = x_max as f64;
     let y_max = y_max as f64;
@@ -79,8 +75,10 @@ mod tests {
 
         for pixel_x in 0..x_max {
             for pixel_y in 0..y_max {
-                let p_fn = projection_function(fov, x_max, y_max, pixel_x, pixel_y);
-                let p_mat = matrix * vector(pixel_x as f64, pixel_y as f64, 1.0);
+                let p_fn =
+                    projection_function(fov, x_max, y_max, pixel_x, pixel_y);
+                let p_mat =
+                    matrix * vector(pixel_x as f64, pixel_y as f64, 1.0);
                 let eps = 1.0e-6;
                 assert!((p_fn.x - eps < p_mat.x) && (p_mat.x < p_fn.x + eps));
                 assert!((p_fn.y - eps < p_mat.y) && (p_mat.y < p_fn.y + eps));

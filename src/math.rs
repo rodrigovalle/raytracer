@@ -75,25 +75,34 @@ pub mod test_util {
         }
     }
 
-    impl<T> EpsEq for (T, T) where T: EpsEq<Rhs = T> {
+    impl<T> EpsEq for (T, T)
+    where
+        T: EpsEq<Rhs = T>,
+    {
         type Rhs = Self;
         fn eps_eq(&self, rhs: &Self::Rhs, eps: f64) -> bool {
             self.0.eps_eq(&rhs.0, eps) && self.1.eps_eq(&rhs.1, eps)
         }
     }
 
-    impl<T> EpsEq for Option<T> where T: EpsEq<Rhs = T> {
+    impl<T> EpsEq for Option<T>
+    where
+        T: EpsEq<Rhs = T>,
+    {
         type Rhs = Self;
         fn eps_eq(&self, rhs: &Self::Rhs, eps: f64) -> bool {
             match (self, rhs) {
                 (Some(a), Some(b)) => a.eps_eq(&b, eps),
                 (None, None) => true,
-                _ => false
+                _ => false,
             }
         }
     }
 
-    pub fn assert_eps_eq<T>(a: &T, b: &T, eps: f64) where T: EpsEq<Rhs = T> + Debug {
+    pub fn assert_eps_eq<T>(a: &T, b: &T, eps: f64)
+    where
+        T: EpsEq<Rhs = T> + Debug,
+    {
         assert!(a.eps_eq(b, eps), "{:?} != {:?}, eps = {}", a, b, eps);
     }
 }

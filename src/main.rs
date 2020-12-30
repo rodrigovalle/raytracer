@@ -6,8 +6,8 @@ use std::f64::consts::PI;
 
 mod camera;
 mod color;
-mod primitive;
 mod math;
+mod primitive;
 use math::{Ray, point, vector};
 use primitive::{Scene, Sphere};
 

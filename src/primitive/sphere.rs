@@ -13,11 +13,7 @@ impl Sphere {
     }
 
     fn normal(&self, point: DVec4) -> DVec4 {
-        let x = (point.x - self.center.x) / self.radius;
-        let y = (point.y - self.center.y) / self.radius;
-        let z = (point.z - self.center.z) / self.radius;
-
-        vector(x, y, z)
+        point - self.center / self.radius
     }
 
     fn solve_intersect(&self, ray: &Ray) -> Option<(f64, f64)> {
@@ -30,6 +26,9 @@ impl Sphere {
         if discriminant >= 0.0 {
             let discriminant = discriminant.sqrt();
             let denominator = 2.0 * a;
+            // TODO: we can avoid a division if we know the answer is going to be negative and
+            // we're going to discard it anyways because the intersection is behind the ray. The
+            // denominator's sign is always positive so it won't change the sign of the result.
             let solution_a = (-b - discriminant) / denominator;
             let solution_b = (-b + discriminant) / denominator;
             Some((solution_a, solution_b))
@@ -42,21 +41,17 @@ impl Sphere {
 impl Scene for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<Ray> {
         if let Some((solution_a, solution_b)) = self.solve_intersect(ray) {
-            let mut dist = None;
-            if solution_a >= 0.0 {
-                dist = Some(solution_a / 2.0);
-            } else if solution_b >= 0.0 {
-                dist = Some(solution_b / 2.0);
-            }
-
-            if let Some(t) = dist {
-                let intersect = ray.position(t);
+            let dist = solution_a.max(solution_b);
+            if dist >= 0.0 {
+                let intersect = ray.position(dist);
                 let normal = self.normal(intersect);
-                return Some(Ray::new(intersect, normal));
+                Some(Ray::new(intersect, normal))
+            } else {
+                None
             }
+        } else {
+            None
         }
-
-        None
     }
 }
 
@@ -74,5 +69,12 @@ mod tests {
 
         let res = sphere.solve_intersect(&ray);
         assert_eps_eq(&res, &Some((4.0, 6.0)), 0.01);
+    }
+
+    #[test]
+    fn test_ray_sphere_normal() {
+        let sphere = Sphere::new(point(0.0, 0.0, 0.0), 1.0 /* radius */);
+        let point_on_sphere = point(0.0, 0.0, 1.0);
+        assert_eps_eq(&sphere.normal(point_on_sphere), &vector(0.0, 0.0, 1.0), 0.01);
     }
 }

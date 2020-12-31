@@ -17,11 +17,11 @@ fn main() {
 
     let mut image: RgbImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
+    // camera is facing in the -z direction
     let fov = f64::to_radians(100.0);
     let camera = camera::projection_matrix(fov, IMAGE_WIDTH, IMAGE_HEIGHT);
     let origin = point(0.0, 0.0, 0.0);
-    // +z direction is towards the camera
-    let scene = Sphere::new(point(0.0, 0.0, -10.0), 5.0);
+    let scene = Sphere::new(point(0.0, 0.0, -3.0), 1.0);
 
     for j in 0..IMAGE_HEIGHT {
         for i in 0..IMAGE_WIDTH {
@@ -36,9 +36,9 @@ fn main() {
     image.save("render.png").expect("Failed to write image");
 }
 
-const LIGHT: DVec4 = vector(3.0, 0.0, 5.0);
-const LIGHT_ENERGY: f64 = 400.0;
-const AMBIENT_LIGHT: f64 = 0.01;
+const LIGHT: DVec4 = point(-3.0, -3.0, 0.0);
+const LIGHT_POWER: f64 = 300.0;
+const AMBIENT_LIGHT: f64 = 0.03;
 
 // TODO: color encoding problem; light intensity is not bound to the range
 // [0.0, 1.0]. The image generation code assumes this in order to convert to the
@@ -46,11 +46,11 @@ const AMBIENT_LIGHT: f64 = 0.01;
 // when the value goes above 255.
 fn trace(ray: Ray, scene: &impl Scene) -> f64 {
     if let Some(normal) = scene.intersect(&ray) {
-        let light_vec = LIGHT - normal.origin;
-        let mag_sq = light_vec.mag_sq();
+        let light_vec = normal.origin - LIGHT;  // point - point is a vector
+        let light_mag_sq = light_vec.mag_sq();
 
-        let lambert = normal.direction.dot(light_vec) / f64::sqrt(mag_sq);
-        let intensity = lambert * LIGHT_ENERGY / (4.0 * PI * mag_sq);
+        let cos = normal.direction.dot(light_vec) / (normal.direction.mag() * f64::sqrt(light_mag_sq));
+        let intensity =  LIGHT_POWER * cos / (4.0 * PI * light_mag_sq);
         return f64::max(intensity, AMBIENT_LIGHT);
     }
 

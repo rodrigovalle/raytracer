@@ -25,7 +25,8 @@ impl Triangle {
         Triangle { p1, p2, p3, e1, e2, normal }
     }
 
-    pub fn normal(&self) -> DVec3 {
+    // TODO: stick this in an interface for primitive objects instead
+    pub fn normal(&self, point: DVec4) -> DVec3 {
         self.normal
     }
 }
@@ -52,5 +53,17 @@ mod tests {
         assert_eps_eq(&triangle.e1, &vector(-1.0, -1.0, 0.0), EPS);
         assert_eps_eq(&triangle.e2, &vector(1.0, -1.0, 0.0), EPS);
         assert_eps_eq(&triangle.normal, &DVec3::new(0.0, 0.0, -1.0), EPS);
+    }
+
+    #[test]
+    fn test_triangle_normal() {
+        let p1 = point(0.0, 1.0, 0.0);
+        let p2 = point(-1.0, 0.0, 0.0);
+        let p3 = point(1.0, 0.0, 0.0);
+        let triangle = Triangle::new(p1, p2, p3);
+
+        assert_eps_eq(&triangle.normal(point(0.0, 0.5, 0.0)), &triangle.normal, EPS);
+        assert_eps_eq(&triangle.normal(point(-0.5, 0.75, 0.0)), &triangle.normal, EPS);
+        assert_eps_eq(&triangle.normal(point(0.5, 0.25, 0.0)), &triangle.normal, EPS);
     }
 }

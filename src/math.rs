@@ -53,7 +53,7 @@ mod tests {
 #[cfg(test)]
 pub mod test_util {
     // floating point comparison utilities
-    use ultraviolet::DVec4;
+    use ultraviolet::{DVec3, DVec4};
     use std::fmt::Debug;
 
     pub trait EpsEq<Rhs = Self> {
@@ -62,6 +62,13 @@ pub mod test_util {
     }
 
     impl EpsEq for DVec4 {
+        type Rhs = Self;
+        fn eps_eq(&self, rhs: &Self::Rhs, eps: f64) -> bool {
+            (*self - *rhs).abs().component_max() < eps
+        }
+    }
+
+    impl EpsEq for DVec3 {
         type Rhs = Self;
         fn eps_eq(&self, rhs: &Self::Rhs, eps: f64) -> bool {
             (*self - *rhs).abs().component_max() < eps

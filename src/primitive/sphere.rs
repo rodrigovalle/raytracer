@@ -75,6 +75,10 @@ mod tests {
     fn test_ray_sphere_normal() {
         let sphere = Sphere::new(point(0.0, 0.0, 0.0), 1.0 /* radius */);
         let point_on_sphere = point(0.0, 0.0, 1.0);
-        assert_eps_eq(&sphere.normal(point_on_sphere), &vector(0.0, 0.0, 1.0), 0.01);
+        assert_eps_eq(
+            &sphere.normal(point_on_sphere),
+            &vector(0.0, 0.0, 1.0),
+            0.01,
+        );
     }
 }

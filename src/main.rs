@@ -46,11 +46,12 @@ const AMBIENT_LIGHT: f64 = 0.03;
 // when the value goes above 255.
 fn trace(ray: Ray, scene: &impl Scene) -> f64 {
     if let Some(normal) = scene.intersect(&ray) {
-        let light_vec = normal.origin - LIGHT;  // point - point is a vector
+        let light_vec = normal.origin - LIGHT; // point - point is a vector
         let light_mag_sq = light_vec.mag_sq();
 
-        let cos = normal.direction.dot(light_vec) / (normal.direction.mag() * f64::sqrt(light_mag_sq));
-        let intensity =  LIGHT_POWER * cos / (4.0 * PI * light_mag_sq);
+        let cos = normal.direction.dot(light_vec)
+            / (normal.direction.mag() * f64::sqrt(light_mag_sq));
+        let intensity = LIGHT_POWER * cos / (4.0 * PI * light_mag_sq);
         return f64::max(intensity, AMBIENT_LIGHT);
     }
 

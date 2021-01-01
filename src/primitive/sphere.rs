@@ -62,13 +62,15 @@ mod tests {
     use math::point;
     use math::test_util::assert_eps_eq;
 
+    const EPS: f64 = 0.01;
+
     #[test]
     fn test_ray_sphere_intersect() {
         let sphere = Sphere::new(point(0.0, 0.0, 0.0), 1.0 /* radius */);
         let ray = Ray::new(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
 
         let res = sphere.solve_intersect(&ray);
-        assert_eps_eq(&res, &Some((4.0, 6.0)), 0.01);
+        assert_eps_eq(&res, &Some((4.0, 6.0)), EPS);
     }
 
     #[test]
@@ -78,7 +80,7 @@ mod tests {
         assert_eps_eq(
             &sphere.normal(point_on_sphere),
             &vector(0.0, 0.0, 1.0),
-            0.01,
+            EPS,
         );
     }
 }

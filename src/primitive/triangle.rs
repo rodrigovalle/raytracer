@@ -22,14 +22,7 @@ impl Triangle {
         let mut normal = e2.xyz().cross(e1.xyz());
         normal.normalize();
 
-        Triangle {
-            p1,
-            p2,
-            p3,
-            e1,
-            e2,
-            normal,
-        }
+        Triangle { p1, p2, p3, e1, e2, normal }
     }
 
     pub fn normal(&self) -> DVec3 {
@@ -47,7 +40,7 @@ mod tests {
     const EPS: f64 = 0.01;
 
     #[test]
-    fn test_triangle_normal() {
+    fn test_triangle_construction() {
         let p1 = point(0.0, 1.0, 0.0);
         let p2 = point(-1.0, 0.0, 0.0);
         let p3 = point(1.0, 0.0, 0.0);

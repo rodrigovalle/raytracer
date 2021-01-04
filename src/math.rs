@@ -18,6 +18,14 @@ pub const fn translation(x: f64, y: f64, z: f64) -> DMat4 {
     DMat4::new(c0, c1, c2, c3)
 }
 
+pub const fn scaling(x: f64, y: f64, z: f64) -> DMat4 {
+    let c0 = DVec4::new(x, 0.0, 0.0, 0.0);
+    let c1 = DVec4::new(0.0, y, 0.0, 0.0);
+    let c2 = DVec4::new(0.0, 0.0, z, 0.0);
+    let c3 = DVec4::new(0.0, 0.0, 0.0, 1.0);
+    DMat4::new(c0, c1, c2, c3)
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Ray {
     pub origin: DVec4,
@@ -59,14 +67,14 @@ mod tests {
     }
 
     #[test]
-    fn test_translation_mat() {
+    fn test_translation_point() {
         let transform = translation(5.0, -3.0, 2.0);
         let p = point(-3.0, 4.0, 5.0);
         assert_eq!(transform * p, point(2.0, 1.0, 7.0));
     }
 
     #[test]
-    fn test_translation_mat_inverse() {
+    fn test_translation_inverse_point() {
         let mut transform = translation(5.0, -3.0, 2.0);
         transform.inverse();
         let p = point(-3.0, 4.0, 5.0);
@@ -74,10 +82,32 @@ mod tests {
     }
 
     #[test]
-    fn test_translation_doesnt_work_on_vectors() {
+    fn test_translation_vector_unchanged() {
         let mut transform = translation(5.0, -3.0, 2.0);
         let v = vector(-3.0, 4.0, 5.0);
         assert_eq!(transform * v, v);
+    }
+
+    #[test]
+    fn test_scaling_point() {
+        let transform = scaling(2.0, 3.0, 4.0);
+        let p = point(-4.0, 6.0, 8.0);
+        assert_eq!(transform * p, point(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn test_scaling_vector() {
+        let transform = scaling(2.0, 3.0, 4.0);
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_eq!(transform * v, vector(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn test_scaling_inverse() {
+        let mut transform = scaling(2.0, 3.0, 4.0);
+        transform.inverse();
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_eq!(transform * v, vector(-2.0, 2.0, 2.0));
     }
 }
 

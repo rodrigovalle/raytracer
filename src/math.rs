@@ -1,4 +1,5 @@
 use ultraviolet::vec::DVec4;
+use ultraviolet::mat::DMat4;
 use std::ops::{Add, Mul};
 
 pub const fn vector(x: f64, y: f64, z: f64) -> DVec4 {
@@ -7,6 +8,14 @@ pub const fn vector(x: f64, y: f64, z: f64) -> DVec4 {
 
 pub const fn point(x: f64, y: f64, z: f64) -> DVec4 {
     DVec4::new(x, y, z, 1.0)
+}
+
+pub const fn translation(x: f64, y: f64, z: f64) -> DMat4 {
+    let c0 = DVec4::new(1.0, 0.0, 0.0, 0.0);
+    let c1 = DVec4::new(0.0, 1.0, 0.0, 0.0);
+    let c2 = DVec4::new(0.0, 0.0, 1.0, 0.0);
+    let c3 = DVec4::new(x, y, z, 1.0);
+    DMat4::new(c0, c1, c2, c3)
 }
 
 #[derive(Debug, PartialEq)]
@@ -47,6 +56,28 @@ mod tests {
         assert_eq!(ray.position(1.0), point(3.0, 3.0, 4.0));
         assert_eq!(ray.position(-1.0), point(1.0, 3.0, 4.0));
         assert_eq!(ray.position(2.5), point(4.5, 3.0, 4.0));
+    }
+
+    #[test]
+    fn test_translation_mat() {
+        let transform = translation(5.0, -3.0, 2.0);
+        let p = point(-3.0, 4.0, 5.0);
+        assert_eq!(transform * p, point(2.0, 1.0, 7.0));
+    }
+
+    #[test]
+    fn test_translation_mat_inverse() {
+        let mut transform = translation(5.0, -3.0, 2.0);
+        transform.inverse();
+        let p = point(-3.0, 4.0, 5.0);
+        assert_eq!(transform * p, point(-8.0, 7.0, 3.0))
+    }
+
+    #[test]
+    fn test_translation_doesnt_work_on_vectors() {
+        let mut transform = translation(5.0, -3.0, 2.0);
+        let v = vector(-3.0, 4.0, 5.0);
+        assert_eq!(transform * v, v);
     }
 }
 
